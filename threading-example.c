@@ -46,15 +46,23 @@ int is_prime(int x)
     return 1;
 }
 
+pthread_mutex_t cond_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  cond_test_prime_ready = PTHREAD_COND_INITIALIZER;
+
 void
 test_for_primes()
 {
     int i = 0;
     while(i < sizeof(nums)/sizeof(nums[0])) {
+        pthread_mutex_lock(&cond_mutex);
         while(test_for_prime != 0) {
+            pthread_mutex_unlock(&cond_mutex);
             sched_yield();
+            pthread_mutex_lock(&cond_mutex);
         }
         test_for_prime = nums[i];
+        pthread_cond_signal(&cond_test_prime_ready);
+        pthread_mutex_unlock(&cond_mutex);
         i++;
     }
 }
@@ -62,12 +70,15 @@ test_for_primes()
 void *
 thread_main(void *targ)
 {
+    pthread_mutex_lock(&cond_mutex);
     while (test_for_prime != -1) {
         if (test_for_prime == 0) {
+            pthread_cond_wait(&cond_test_prime_ready, &cond_mutex);
             continue;
         }
         int x = test_for_prime;
         test_for_prime = 0;
+        pthread_mutex_unlock(&cond_mutex);
         int prime = is_prime(x);
         if (prime) {
             printf("%d is prime\n", x);
@@ -75,7 +86,12 @@ thread_main(void *targ)
         else {
             printf("%d is not prime\n", x);
         }
+        pthread_mutex_lock(&cond_mutex);
     }
+    // signal the other primality checker threads so that
+    // they too may exit
+    pthread_cond_broadcast(&cond_test_prime_ready);
+    pthread_mutex_unlock(&cond_mutex);
     return NULL;
 }
 
