@@ -10,7 +10,7 @@ The thread unsafe code may appear to work if there is only one or two cores. Wit
 
 ## The Changes for Thread Safety
 
-https://github.com/carpecarp/threading-example/commit/71448156c2761bb869792ba2c1b13e3f0d0d499c#diff-e297099dfdee8bae8d86a465021850ae06b2bbadf1546424ab22918bf00a0f5d
+https://github.com/carpecarp/threading-example/compare/unsafe...safe
 
 ## Running the unsafe code
 ```
