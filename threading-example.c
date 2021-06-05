@@ -35,7 +35,7 @@ int is_prime(int x)
 {
     int i = 0;
     if (x == 1) {
-        return 1;
+        return 0;
     }
     while(i < sizeof(factors)/sizeof(factors[0])) {
         if ((x % factors[i]) == 0) {
